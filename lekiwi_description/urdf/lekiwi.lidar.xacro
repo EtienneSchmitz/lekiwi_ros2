@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<!-- LiDAR 360 DTOF monte sur le dessus du plateau LeKiwi, sur des montants (standoffs)
+     pour que le plan de scan passe AU-DESSUS du chassis (pas d'auto-occultation).
+     Modele cible = LDRobot D500 (coeur STL-19P, famille LD19). Mesh visuel ld06_lidar.stl
+     (meme famille LDRobot, vendorise depuis adityakamath/lekiwi_ros2). Le capteur gpu_lidar
+     (cf. lekiwi.gazebo.xacro) est cale sur les specs D500. Frame 'laser_link'.
+
+     Reperes (depuis base_link) :
+       plaque sup ~0.078 | montants ~0.078->0.115 | laser_link (plan scan) 0.115
+       base (chassis) max 0.1075 -> le scan a 0.115 degage tout le robot. -->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:macro name="lekiwi_lidar" params="parent x:=-0.045042 deck_z:=0.078 laser_z:=0.115">
+
+    <!-- Montant / standoff (support du LiDAR) -->
+    <link name="lidar_standoff_link">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry><cylinder radius="0.010" length="${laser_z - deck_z}"/></geometry>
+        <material name="lekiwi_charcoal"/>
+      </visual>
+    </link>
+    <joint name="lidar_standoff_joint" type="fixed">
+      <parent link="${parent}"/>
+      <child link="lidar_standoff_link"/>
+      <origin xyz="${x} 0 ${(deck_z + laser_z)/2}" rpy="0 0 0"/>
+    </joint>
+
+    <!-- Corps du LiDAR (mesh) -->
+    <link name="laser_link">
+      <visual>
+        <origin xyz="0 0 0" rpy="${pi/2} 0 0"/>
+        <geometry>
+          <mesh filename="package://lekiwi_description/meshes/base/ld06_lidar.stl"/>
+        </geometry>
+        <material name="lekiwi_charcoal"/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0.015" rpy="0 0 0"/>
+        <geometry><cylinder radius="0.019" length="0.033"/></geometry>
+      </collision>
+      <inertial>
+        <mass value="0.05"/>
+        <inertia ixx="1e-4" ixy="0" ixz="0" iyy="1e-4" iyz="0" izz="1e-4"/>
+      </inertial>
+    </link>
+
+    <joint name="laser_joint" type="fixed">
+      <parent link="${parent}"/>
+      <child link="laser_link"/>
+      <origin xyz="${x} 0 ${laser_z}" rpy="0 0 0"/>
+    </joint>
+  </xacro:macro>
+
+</robot>

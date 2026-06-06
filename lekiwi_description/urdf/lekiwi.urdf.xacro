@@ -1,0 +1,37 @@
+<?xml version="1.0"?>
+<!-- ============================================================================
+     LeKiwi — top-level URDF Xacro (base mobile, Bootcamp 2026 / Jour 2 Navigation)
+
+       mode             : gazebo | display | real   (defaut: gazebo)
+       controllers_file : chemin du ros2_controllers.yaml (fourni par lekiwi_bringup)
+
+     - display : base + LiDAR (visuel) seulement, pour RViz
+     - gazebo  : + ros2_control (GazeboSimSystem) + capteur gpu_lidar D500
+     - real    : + ros2_control (mock pour l'instant ; driver Feetech plus tard)
+     ============================================================================ -->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="lekiwi">
+
+  <xacro:arg name="mode" default="gazebo"/>
+  <xacro:arg name="controllers_file" default=""/>
+
+  <!-- Geometrie de la base + roues + mount_link -->
+  <xacro:include filename="$(find lekiwi_description)/urdf/lekiwi.base.xacro"/>
+
+  <!-- LiDAR D500 monte sur le plateau -->
+  <xacro:include filename="$(find lekiwi_description)/urdf/lekiwi.lidar.xacro"/>
+  <xacro:lekiwi_lidar parent="base_link"/>
+
+  <!-- ros2_control + Gazebo (sauf en mode display) -->
+  <xacro:if value="${'$(arg mode)' == 'gazebo'}">
+    <xacro:include filename="$(find lekiwi_description)/urdf/lekiwi.ros2_control.xacro"/>
+    <xacro:include filename="$(find lekiwi_description)/urdf/lekiwi.gazebo.xacro"/>
+    <xacro:lekiwi_ros2_control mode="gazebo"/>
+    <xacro:lekiwi_gazebo controllers_file="$(arg controllers_file)"/>
+  </xacro:if>
+
+  <xacro:if value="${'$(arg mode)' == 'real'}">
+    <xacro:include filename="$(find lekiwi_description)/urdf/lekiwi.ros2_control.xacro"/>
+    <xacro:lekiwi_ros2_control mode="real"/>
+  </xacro:if>
+
+</robot>

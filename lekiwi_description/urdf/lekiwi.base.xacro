@@ -1,0 +1,131 @@
+<?xml version="1.0"?>
+<!-- Base mobile LeKiwi : 3 roues omnidirectionnelles (kiwi 120 deg) + chassis + mount_link.
+     Meshes vendorisees depuis adityakamath/lekiwi_ros2 (Apache-2.0, decimees) :
+       - lekiwi_base.stl  (plateau)
+       - omni_wheel.stl   (roue omni a galets, x3)
+     Geometrie identique a la reference :
+       rayon roue   = 0.051 m
+       rayon robot  = 0.132239 m (centre -> contact roue)
+       roues a 60 / 180 / 300 deg (espacement 120 deg)
+     VISUAL = mesh ; COLLISION = primitives (cylindres) pour une physique stable
+     compatible avec la friction anisotrope des roues (cf. lekiwi.gazebo.xacro). -->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- ============================ Parametres ============================ -->
+  <xacro:property name="wheel_radius" value="0.051"/>
+  <xacro:property name="wheel_width"  value="0.0425"/>
+  <xacro:property name="robot_radius" value="0.132239"/>
+  <xacro:property name="wheel_z"      value="0.01036"/>   <!-- offset roue / base_link -->
+  <xacro:property name="base_offset_rz" value="${3*pi/2}"/> <!-- rotation du mesh plateau -->
+  <xacro:property name="mount_z"      value="0.078"/>     <!-- pont superieur (spot bras SO-101) -->
+
+  <!-- ============================ Materiaux ============================ -->
+  <material name="lekiwi_light_grey"><color rgba="0.8 0.8 0.8 1.0"/></material>
+  <material name="lekiwi_charcoal"><color rgba="0.15 0.15 0.15 1.0"/></material>
+  <material name="lekiwi_orange"><color rgba="0.9 0.45 0.1 1.0"/></material>
+
+  <!-- ===================== Macro inertie cylindre ====================== -->
+  <xacro:macro name="cylinder_inertia" params="m r h">
+    <inertial>
+      <mass value="${m}"/>
+      <inertia
+        ixx="${m*(3*r*r+h*h)/12}" ixy="0.0" ixz="0.0"
+        iyy="${m*(3*r*r+h*h)/12}" iyz="0.0"
+        izz="${m*r*r/2}"/>
+    </inertial>
+  </xacro:macro>
+
+  <!-- ===================== Macro roue omni ============================= -->
+  <!-- angle = position angulaire de la roue autour du robot (rad).
+       VISUAL = mesh omni_wheel.stl ; COLLISION = cylindre (axe = Z local = radial
+       apres rpy="0 pi/2 angle"). -->
+  <xacro:macro name="omni_wheel" params="name angle">
+    <link name="${name}_link">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry>
+          <mesh filename="package://lekiwi_description/meshes/base/omni_wheel.stl"/>
+        </geometry>
+        <material name="lekiwi_charcoal"/>
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry><cylinder radius="${wheel_radius}" length="${wheel_width}"/></geometry>
+      </collision>
+      <xacro:cylinder_inertia m="0.1" r="${wheel_radius}" h="${wheel_width}"/>
+    </link>
+
+    <joint name="${name}_joint" type="continuous">
+      <parent link="base_link"/>
+      <child link="${name}_link"/>
+      <origin xyz="${robot_radius*cos(angle)} ${robot_radius*sin(angle)} ${wheel_z}"
+              rpy="0 ${pi/2} ${angle}"/>
+      <axis xyz="0 0 1"/>
+      <limit effort="2.0" velocity="20.0"/>
+    </joint>
+  </xacro:macro>
+
+  <!-- ============================ base_footprint ======================= -->
+  <!-- racine (sans inertie : KDL n'accepte pas d'inertie sur la racine) -->
+  <link name="base_footprint"/>
+
+  <joint name="base_footprint_joint" type="fixed">
+    <parent link="base_footprint"/>
+    <child link="base_link"/>
+    <origin xyz="0 0 ${wheel_radius - wheel_z}" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ============================ base_link / plateau ================== -->
+  <link name="base_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 ${base_offset_rz}"/>
+      <geometry>
+        <mesh filename="package://lekiwi_description/meshes/base/lekiwi_base.stl"/>
+      </geometry>
+      <material name="lekiwi_light_grey"/>
+    </visual>
+    <!-- collision : cylindre simple sous la hauteur du LiDAR (pas d'auto-occultation) -->
+    <collision>
+      <origin xyz="0 0 0.035" rpy="0 0 0"/>
+      <geometry><cylinder radius="0.10" length="0.07"/></geometry>
+    </collision>
+    <xacro:cylinder_inertia m="2.0" r="0.10" h="0.10"/>
+  </link>
+
+  <!-- ============================ 3 roues omni ========================= -->
+  <xacro:omni_wheel name="left_wheel"  angle="${pi/3}"/>      <!-- 60 deg -->
+  <xacro:omni_wheel name="back_wheel"  angle="${pi}"/>        <!-- 180 deg -->
+  <xacro:omni_wheel name="right_wheel" angle="${5*pi/3}"/>    <!-- 300 deg -->
+
+  <!-- ============================ IMU BNO055 ========================== -->
+  <!-- IMU 9 DoF (fusionnee a l'odometrie roues via EKF, cf. lekiwi_bringup).
+       imu_link = mesh ; imu_frame = repere de publication des messages Imu. -->
+  <link name="imu_link">
+    <visual>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <geometry>
+        <mesh filename="package://lekiwi_description/meshes/base/bno055_imu.stl"/>
+      </geometry>
+      <material name="lekiwi_charcoal"/>
+    </visual>
+  </link>
+
+  <joint name="imu_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="imu_link"/>
+    <origin xyz="-0.044 0 0.08" rpy="0 0 0"/>
+  </joint>
+
+  <link name="imu_frame"/>
+  <joint name="imu_frame_joint" type="fixed">
+    <parent link="imu_link"/>
+    <child link="imu_frame"/>
+    <origin xyz="0 0 0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ============================ (S20) mount du bras SO-101 ============ -->
+  <!-- En navigation pure (J2), pas de point de montage du bras.
+       En S20 : ajouter ici un 'mount_link' sur le pont superieur (z ~ ${mount_z})
+       puis include so101_description et fixer arm_base_link a ce frame. -->
+
+</robot>

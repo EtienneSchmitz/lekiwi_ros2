@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!-- Bloc ros2_control de la base LeKiwi : 3 joints roue en interface 'velocity'.
+     mode = gazebo (gz_ros2_control/GazeboSimSystem) | real (placeholder, plus tard). -->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:macro name="lekiwi_ros2_control" params="mode:=gazebo">
+    <ros2_control name="lekiwi_base" type="system">
+      <hardware>
+        <xacro:if value="${mode == 'gazebo'}">
+          <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+        </xacro:if>
+        <xacro:if value="${mode == 'real'}">
+          <!-- TODO passage au reel : hardware_interface des moteurs Feetech STS3215 -->
+          <plugin>mock_components/GenericSystem</plugin>
+        </xacro:if>
+      </hardware>
+
+      <xacro:macro name="wheel_joint" params="name">
+        <joint name="${name}_joint">
+          <command_interface name="velocity"/>
+          <state_interface name="velocity"/>
+          <state_interface name="position"/>
+        </joint>
+      </xacro:macro>
+
+      <xacro:wheel_joint name="left_wheel"/>
+      <xacro:wheel_joint name="back_wheel"/>
+      <xacro:wheel_joint name="right_wheel"/>
+    </ros2_control>
+  </xacro:macro>
+
+</robot>

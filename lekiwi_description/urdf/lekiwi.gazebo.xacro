@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+<!-- Integration Gazebo Ionic (gz-sim 9) :
+       - plugin gz_ros2_control/GazeboSimSystem (charge controller_manager + controleurs)
+       - capteur gpu_lidar cale sur les specs du LDRobot D500 (360 deg, 720 pts, 0.03-12 m, 10 Hz) -->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:macro name="lekiwi_gazebo" params="controllers_file">
+    <!-- ros2_control via gz_ros2_control -->
+    <gazebo>
+      <plugin filename="gz_ros2_control-system"
+              name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+        <parameters>${controllers_file}</parameters>
+      </plugin>
+    </gazebo>
+
+    <!-- Friction anisotrope des roues omni : traction dans la direction de roulement
+         (tangentielle = Y local), glissement libre dans la direction des galets
+         (radiale = Z local). Reproduit le comportement d'une roue omni a galets. -->
+    <xacro:macro name="omni_friction" params="link">
+      <gazebo reference="${link}">
+        <mu1>1.0</mu1>
+        <mu2>0.0</mu2>
+        <fdir1>0 1 0</fdir1>
+      </gazebo>
+    </xacro:macro>
+    <xacro:omni_friction link="left_wheel_link"/>
+    <xacro:omni_friction link="back_wheel_link"/>
+    <xacro:omni_friction link="right_wheel_link"/>
+
+    <!-- IMU BNO055 sur imu_frame (fusionnee a l'odom roues via EKF) -->
+    <gazebo reference="imu_frame">
+      <sensor name="bno055" type="imu">
+        <topic>imu/data</topic>
+        <gz_frame_id>imu_frame</gz_frame_id>
+        <update_rate>100</update_rate>
+        <always_on>true</always_on>
+      </sensor>
+    </gazebo>
+
+    <!-- LiDAR D500 sur laser_link -->
+    <gazebo reference="laser_link">
+      <sensor name="lidar_d500" type="gpu_lidar">
+        <topic>scan</topic>
+        <gz_frame_id>laser_link</gz_frame_id>
+        <update_rate>10</update_rate>
+        <always_on>true</always_on>
+        <visualize>true</visualize>
+        <lidar>
+          <scan>
+            <horizontal>
+              <samples>720</samples>
+              <resolution>1</resolution>
+              <min_angle>-3.14159265359</min_angle>
+              <max_angle>3.14159265359</max_angle>
+            </horizontal>
+            <vertical>
+              <samples>1</samples>
+              <resolution>1</resolution>
+              <min_angle>0</min_angle>
+              <max_angle>0</max_angle>
+            </vertical>
+          </scan>
+          <range>
+            <min>0.03</min>
+            <max>12.0</max>
+            <resolution>0.01</resolution>
+          </range>
+        </lidar>
+      </sensor>
+    </gazebo>
+  </xacro:macro>
+
+</robot>
