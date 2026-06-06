@@ -1,0 +1,31 @@
+# Controleurs ros2_control de la base LeKiwi (sim Gazebo).
+#   - joint_state_broadcaster : publie /joint_states
+#   - omni_wheel_drive_controller : convertit /cmd_vel (TwistStamped) -> vitesses des 3 roues,
+#     publie l'odometrie (/odom) et la tf odom -> base_link.
+controller_manager:
+  ros__parameters:
+    update_rate: 100
+    use_sim_time: true
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+    omni_wheel_drive_controller:
+      type: omni_wheel_drive_controller/OmniWheelDriveController
+
+omni_wheel_drive_controller:
+  ros__parameters:
+    use_sim_time: true
+    # Roues dans l'ordre anti-horaire en partant de la 1re (offset depuis +x)
+    wheel_names: ["left_wheel_joint", "back_wheel_joint", "right_wheel_joint"]
+    wheel_offset: 1.0471975512   # pi/3 = 60 deg (1re roue : left_wheel a 60 deg)
+    robot_radius: 0.132239       # centre -> contact roue
+    wheel_radius: 0.051
+    odom_frame_id: "odom"
+    base_frame_id: "base_footprint"
+    enable_odom_tf: false        # la tf odom->base_footprint est publiee par l'EKF
+    open_loop: false
+    position_feedback: true
+    cmd_vel_timeout: 0.5
+    pose_covariance_diagonal: [0.001, 0.001, 0.001, 0.001, 0.001, 0.01]
+    twist_covariance_diagonal: [0.001, 0.001, 0.001, 0.001, 0.001, 0.01]
