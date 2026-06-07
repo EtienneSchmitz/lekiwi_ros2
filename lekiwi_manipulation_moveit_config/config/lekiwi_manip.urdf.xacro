@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<!--
+  URDF charge par MoveIt pour la planification de la plateforme de manipulation
+  mobile (LeKiwi + SO-101). Wrapper minimal qui include le xacro canonique de
+  lekiwi_description en mode 'moveit' :
+    - pas de blocs <ros2_control> ni de plugin Gazebo (MoveIt n'en a pas besoin) ;
+    - cameras desactivees (eviter des collisions parasites dans le modele de
+      planification ; le mat de scene est hors de portee des trajectoires usuelles).
+  Le ros2_control runtime est porte par lekiwi_bringup/sim_full.launch.py (sim).
+-->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="lekiwi_manip">
+  <xacro:include filename="$(find lekiwi_description)/urdf/lekiwi_manip.urdf.xacro"/>
+</robot>

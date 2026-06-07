@@ -124,8 +124,15 @@
   </joint>
 
   <!-- ============================ (S20) mount du bras SO-101 ============ -->
-  <!-- En navigation pure (J2), pas de point de montage du bras.
-       En S20 : ajouter ici un 'mount_link' sur le pont superieur (z ~ ${mount_z})
-       puis include so101_description et fixer arm_base_link a ce frame. -->
+  <!-- Point de montage sur le pont superieur du plateau. Link vide (sans
+       collision/inertie) : inoffensif pour le LeKiwi standalone (navigation J2),
+       et sert d'ancrage au bras SO-101 sur la plateforme de manipulation mobile
+       (cf. lekiwi_manip.urdf.xacro : xacro:so101_arm parent="mount_link"). -->
+  <link name="mount_link"/>
+  <joint name="mount_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="mount_link"/>
+    <origin xyz="0 0 ${mount_z}" rpy="0 0 0"/>
+  </joint>
 
 </robot>

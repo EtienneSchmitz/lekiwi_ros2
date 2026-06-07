@@ -1,0 +1,117 @@
+<?xml version="1.0"?>
+<!-- ============================================================================
+     Cameras RGB-D pour la plateforme de manipulation mobile (Gazebo Ionic).
+
+     Deux montages (prepa Jour 4 Vision / Jour 5 Integration) :
+       - WRIST (eye-in-hand) : sur le poignet du bras (link actionne par wrist_flex,
+         la "J4"), regard vers le gripper. La camera suit l'objet pendant le pick.
+       - SCENE (fixe) : sur un mat au-dessus du pont, regard plongeant sur le plan
+         de travail devant le robot. Vue stable pour la detection.
+
+     Chaque camera = capteur Gazebo type 'rgbd_camera' :
+       publie <topic>/image, <topic>/depth_image, <topic>/points, <topic>/camera_info.
+     Frames : <name>_camera_link (corps) + <name>_camera_optical_frame (REP-103 :
+     x droite, y bas, z avant). gz_frame_id = optical frame (nuage de points oriente
+     correctement). Le monde bootcamp.sdf embarque deja gz-sim-sensors-system.
+     ============================================================================ -->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <!-- Macro generique : cree link + optical frame + capteur rgbd_camera.
+       parent : link porteur ; *origin : pose de la camera / parent.
+       topic  : prefixe de topic ROS (=> /<topic>/image, /<topic>/points...).
+       fov    : champ horizontal (rad) ; w,h : resolution ; near,far : clipping. -->
+  <xacro:macro name="rgbd_camera" params="name parent topic *origin
+                                          fov:=1.0472 w:=640 h:=480 near:=0.05 far:=8.0">
+    <link name="${name}_camera_link">
+      <visual>
+        <origin xyz="0 0 0" rpy="0 0 0"/>
+        <geometry><box size="0.025 0.090 0.025"/></geometry>
+        <material name="lekiwi_charcoal"/>
+      </visual>
+      <inertial>
+        <mass value="0.05"/>
+        <inertia ixx="1e-5" ixy="0" ixz="0" iyy="1e-5" iyz="0" izz="1e-5"/>
+      </inertial>
+    </link>
+    <joint name="${name}_camera_joint" type="fixed">
+      <parent link="${parent}"/>
+      <child link="${name}_camera_link"/>
+      <xacro:insert_block name="origin"/>
+    </joint>
+
+    <!-- Optical frame (convention vision REP-103) -->
+    <link name="${name}_camera_optical_frame"/>
+    <joint name="${name}_camera_optical_joint" type="fixed">
+      <parent link="${name}_camera_link"/>
+      <child link="${name}_camera_optical_frame"/>
+      <origin xyz="0 0 0" rpy="${-pi/2} 0 ${-pi/2}"/>
+    </joint>
+
+    <gazebo reference="${name}_camera_link">
+      <sensor name="${name}_rgbd" type="rgbd_camera">
+        <topic>${topic}</topic>
+        <gz_frame_id>${name}_camera_optical_frame</gz_frame_id>
+        <update_rate>15</update_rate>
+        <always_on>true</always_on>
+        <visualize>false</visualize>
+        <camera>
+          <horizontal_fov>${fov}</horizontal_fov>
+          <image>
+            <width>${w}</width>
+            <height>${h}</height>
+            <format>R8G8B8</format>
+          </image>
+          <clip>
+            <near>${near}</near>
+            <far>${far}</far>
+          </clip>
+        </camera>
+      </sensor>
+    </gazebo>
+  </xacro:macro>
+
+  <!-- Macro plateforme : instancie les cameras, chacune activable independamment.
+       arm_wrist_link = poignet (J4) ; mount_link = pont du LeKiwi.
+       wrist_enabled / scene_enabled (booleens) : ajouter ou retirer chaque camera
+       (et son mat) sans toucher au reste de la description. -->
+  <xacro:macro name="lekiwi_cameras"
+               params="wrist_enabled:=true scene_enabled:=true
+                       wrist_parent:=arm_wrist_link mount_parent:=mount_link">
+
+    <!-- WRIST (eye-in-hand) : montee sur le cote du poignet, orientee vers le
+         gripper. La pose fine est a ajuster visuellement (RViz/Gazebo GUI). -->
+    <xacro:if value="${wrist_enabled}">
+      <xacro:rgbd_camera name="wrist" parent="${wrist_parent}" topic="wrist_camera"
+                         fov="1.2" near="0.02" far="2.0">
+        <origin xyz="0 -0.045 0.03" rpy="0 ${pi/2} ${-pi/2}"/>
+      </xacro:rgbd_camera>
+    </xacro:if>
+
+    <!-- SCENE (fixe) : mat depuis le pont + camera plongeante (~0.7 rad) vers +X -->
+    <xacro:if value="${scene_enabled}">
+      <link name="scene_mast_link">
+        <visual>
+          <origin xyz="0 0 0.20" rpy="0 0 0"/>
+          <geometry><cylinder radius="0.008" length="0.40"/></geometry>
+          <material name="lekiwi_charcoal"/>
+        </visual>
+        <inertial>
+          <mass value="0.05"/>
+          <inertia ixx="1e-4" ixy="0" ixz="0" iyy="1e-4" iyz="0" izz="1e-5"/>
+        </inertial>
+      </link>
+      <joint name="scene_mast_joint" type="fixed">
+        <parent link="${mount_parent}"/>
+        <child link="scene_mast_link"/>
+        <origin xyz="-0.08 0 0" rpy="0 0 0"/>
+      </joint>
+
+      <xacro:rgbd_camera name="scene" parent="scene_mast_link" topic="scene_camera"
+                         fov="1.3" near="0.1" far="5.0">
+        <origin xyz="0.03 0 0.40" rpy="0 0.7 0"/>
+      </xacro:rgbd_camera>
+    </xacro:if>
+
+  </xacro:macro>
+
+</robot>

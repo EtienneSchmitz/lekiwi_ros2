@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<!-- ============================================================================
+     Plateforme de manipulation mobile : LeKiwi (base omni) + SO-101 (bras 6 DoF)
+     + cameras RGB-D (Bootcamp 2026 / Session S20, prepa Jours 4-5).
+
+     Une seule robot_description, un seul controller_manager :
+       - base : <ros2_control name="lekiwi_base">  (3 roues, velocity)
+       - bras : <ros2_control name="RobotSystem">   (6 joints arm_*, position)
+       - UN SEUL plugin gz_ros2_control.
+
+     Le bras est prefixe 'arm_' (evite la collision de frame 'base_link' avec la
+     base) et fixe au 'mount_link' du pont LeKiwi.
+
+     Arguments :
+       mode             : gazebo (sim + ros2_control) | display (RViz) | moveit
+                          (ni plugin ni ros2_control, pour move_group).
+       controllers_file : ros2_controllers.full.yaml (fourni par lekiwi_bringup).
+       arm_initial_positions_file : YAML poses initiales du bras.
+       wrist_camera / scene_camera : 'true'/'false' pour ajouter/retirer chaque
+                          camera RGB-D independamment.
+     ============================================================================ -->
+<robot xmlns:xacro="http://www.ros.org/wiki/xacro" name="lekiwi_manip">
+
+  <xacro:arg name="mode" default="gazebo"/>
+  <xacro:arg name="controllers_file" default=""/>
+  <xacro:arg name="arm_initial_positions_file"
+             default="$(find so101_description)/config/initial_positions.yaml"/>
+  <xacro:arg name="wrist_camera" default="true"/>
+  <xacro:arg name="scene_camera" default="true"/>
+
+  <!-- ===================== Base LeKiwi (base_footprint -> base_link -> mount) -->
+  <xacro:include filename="$(find lekiwi_description)/urdf/lekiwi.base.xacro"/>
+
+  <!-- LiDAR D500 -->
+  <xacro:include filename="$(find lekiwi_description)/urdf/lekiwi.lidar.xacro"/>
+  <xacro:lekiwi_lidar parent="base_link"/>
+
+  <!-- ===================== Bras SO-101 prefixe, monte sur le pont =========== -->
+  <xacro:include filename="$(find so101_description)/urdf/so101.macro.xacro"/>
+  <xacro:so101_arm prefix="arm_" parent="mount_link" xyz="0 0 0" rpy="0 0 0"/>
+
+  <!-- ===================== Cameras RGB-D (activables) ======================= -->
+  <xacro:include filename="$(find lekiwi_description)/urdf/lekiwi.cameras.xacro"/>
+  <xacro:lekiwi_cameras wrist_enabled="$(arg wrist_camera)"
+                        scene_enabled="$(arg scene_camera)"
+                        wrist_parent="arm_wrist_link"
+                        mount_parent="mount_link"/>
+
+  <!-- ===================== ros2_control + Gazebo (mode gazebo) ============== -->
+  <xacro:if value="${'$(arg mode)' == 'gazebo'}">
+    <!-- Bloc ros2_control de la base (3 roues) -->
+    <xacro:include filename="$(find lekiwi_description)/urdf/lekiwi.ros2_control.xacro"/>
+    <xacro:lekiwi_ros2_control mode="gazebo"/>
+
+    <!-- Bloc ros2_control du bras (6 joints arm_*) -->
+    <xacro:include filename="$(find so101_description)/urdf/so101.ros2_control.xacro"/>
+    <xacro:so101_ros2_control name="RobotSystem" prefix="arm_"
+                              initial_positions_file="$(arg arm_initial_positions_file)"/>
+
+    <!-- Capteurs/frictions LeKiwi + UN SEUL plugin gz_ros2_control -->
+    <xacro:include filename="$(find lekiwi_description)/urdf/lekiwi.gazebo.xacro"/>
+    <xacro:lekiwi_gz_sensors/>
+    <xacro:lekiwi_gz_plugin controllers_file="$(arg controllers_file)"/>
+  </xacro:if>
+
+  <!-- mode 'display' / 'moveit' : aucune integration ros2_control/plugin -->
+
+</robot>

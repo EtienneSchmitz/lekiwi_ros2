@@ -1,0 +1,14 @@
+# Pose initiale du bras SO-101 sur la plateforme mobile (sim Gazebo).
+# Les cles sont NON prefixees (le YAML est lu par so101_ros2_control qui indexe
+# par nom court ; le prefixe arm_ est applique aux <joint name>, pas aux cles).
+#
+# Pose 'home' (tout a zero) : sans auto-collision -> MoveIt peut planifier des le
+# demarrage. La pose repliee par defaut du SO-101 standalone (elbow_flex=1.58...)
+# est compacte mais MoveIt la considere en contact forearm/epaule.
+initial_positions:
+  shoulder_pan: 0.0
+  shoulder_lift: 0.0
+  elbow_flex: 0.0
+  wrist_flex: 0.0
+  wrist_roll: 0.0
+  gripper: 0.0

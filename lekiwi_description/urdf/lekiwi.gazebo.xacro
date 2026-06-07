@@ -1,18 +1,30 @@
 <?xml version="1.0"?>
 <!-- Integration Gazebo Ionic (gz-sim 9) :
        - plugin gz_ros2_control/GazeboSimSystem (charge controller_manager + controleurs)
-       - capteur gpu_lidar cale sur les specs du LDRobot D500 (360 deg, 720 pts, 0.03-12 m, 10 Hz) -->
+       - capteur gpu_lidar cale sur les specs du LDRobot D500 (360 deg, 720 pts, 0.03-12 m, 10 Hz)
+
+     Trois macros :
+       lekiwi_gz_plugin(controllers_file) : UNIQUEMENT le plugin gz_ros2_control.
+       lekiwi_gz_sensors()                : frictions roues omni + capteurs IMU/LiDAR.
+       lekiwi_gazebo(controllers_file)    : appelle les deux (LeKiwi standalone, J2).
+
+     La separation permet a la plateforme de manipulation mobile (LeKiwi + SO-101)
+     de n'instancier QU'UN SEUL plugin gz_ros2_control (un seul controller_manager
+     pour les deux robots) tout en reutilisant les capteurs/frictions du LeKiwi. -->
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <xacro:macro name="lekiwi_gazebo" params="controllers_file">
-    <!-- ros2_control via gz_ros2_control -->
+  <!-- ===================== Plugin gz_ros2_control (UN seul par sim) ====== -->
+  <xacro:macro name="lekiwi_gz_plugin" params="controllers_file">
     <gazebo>
       <plugin filename="gz_ros2_control-system"
               name="gz_ros2_control::GazeboSimROS2ControlPlugin">
         <parameters>${controllers_file}</parameters>
       </plugin>
     </gazebo>
+  </xacro:macro>
 
+  <!-- ===================== Frictions roues omni + capteurs ============== -->
+  <xacro:macro name="lekiwi_gz_sensors">
     <!-- Friction anisotrope des roues omni : traction dans la direction de roulement
          (tangentielle = Y local), glissement libre dans la direction des galets
          (radiale = Z local). Reproduit le comportement d'une roue omni a galets. -->
@@ -68,6 +80,12 @@
         </lidar>
       </sensor>
     </gazebo>
+  </xacro:macro>
+
+  <!-- ===================== Composite (LeKiwi standalone, J2) ============ -->
+  <xacro:macro name="lekiwi_gazebo" params="controllers_file">
+    <xacro:lekiwi_gz_plugin controllers_file="${controllers_file}"/>
+    <xacro:lekiwi_gz_sensors/>
   </xacro:macro>
 
 </robot>

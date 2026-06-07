@@ -1,0 +1,19 @@
+nav_then_pick:
+  ros__parameters:
+    # But de navigation (repere map/odom) : x, y, yaw [m, m, rad].
+    # Zone de travail devant le robot, en espace libre (obstacles : box (1.2,0.8),
+    # cylindre (-1.0,-0.7) ; murs a +/-2.5).
+    nav_goal: [1.0, 0.0, 0.0]
+
+    # Poses du bras = valeurs articulaires [shoulder_pan, shoulder_lift,
+    # elbow_flex, wrist_flex, wrist_roll] (rad). Sans perception : pre-calculees.
+    pose_ready:    [0.0, -1.0, 1.5, 0.0, 0.0]
+    pose_pre_pick: [0.0, -0.6, 1.2, 0.4, 0.0]
+    pose_pick:     [0.0, -0.3, 0.9, 0.6, 0.0]
+
+    # Pince (arm_gripper) : ouverture / fermeture [rad].
+    gripper_open: 1.5
+    gripper_close: 0.0
+
+    # Tolerance d'arrivee nav et temps max par etape.
+    plan_time: 8.0

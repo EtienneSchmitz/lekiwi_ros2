@@ -13,6 +13,9 @@
 
   <depend>urdf</depend>
   <exec_depend>xacro</exec_depend>
+  <!-- Plateforme de manipulation mobile (lekiwi_manip.urdf.xacro) : reutilise le
+       bras SO-101 (so101.macro.xacro) et ses meshes. -->
+  <exec_depend>so101_description</exec_depend>
   <exec_depend>robot_state_publisher</exec_depend>
   <exec_depend>joint_state_publisher</exec_depend>
   <exec_depend>joint_state_publisher_gui</exec_depend>
