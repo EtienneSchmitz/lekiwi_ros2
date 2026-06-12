@@ -12,8 +12,8 @@ import os
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import (DeclareLaunchArgument, IncludeLaunchDescription,
-                            RegisterEventHandler)
+from launch.actions import (AppendEnvironmentVariable, DeclareLaunchArgument,
+                            IncludeLaunchDescription, RegisterEventHandler)
 from launch.conditions import IfCondition, UnlessCondition
 from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
@@ -43,6 +43,11 @@ def generate_launch_description():
     headless_arg = DeclareLaunchArgument(
         'headless', default_value='false',
         description='true = Gazebo serveur seul (sans GUI).')
+
+    # Permet a Gazebo de resoudre les meshes package://lekiwi_description/...
+    # (sinon le robot spawn sans visuel : seules les collisions existent).
+    set_resource_path = AppendEnvironmentVariable(
+        'GZ_SIM_RESOURCE_PATH', os.path.dirname(desc_share))
 
     # --- robot_description (mode gazebo, avec le fichier de controleurs) ---
     robot_description = ParameterValue(
@@ -127,6 +132,7 @@ def generate_launch_description():
         world_arg,
         use_sim_time_arg,
         headless_arg,
+        set_resource_path,
         robot_state_publisher,
         gz_sim_gui,
         gz_sim_headless,
