@@ -8,6 +8,13 @@ install(
   DESTINATION share/${PROJECT_NAME}
 )
 
+# Noeud de teleop clavier AZERTY (ZQSD) pour la base holonome
+install(
+  PROGRAMS scripts/teleop_azerty.py
+  DESTINATION lib/${PROJECT_NAME}
+  RENAME teleop_azerty
+)
+
 if(BUILD_TESTING)
   find_package(ament_lint_auto REQUIRED)
   ament_lint_auto_find_test_dependencies()
