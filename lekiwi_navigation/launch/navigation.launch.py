@@ -19,7 +19,8 @@ import os
 
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import DeclareLaunchArgument, IncludeLaunchDescription
+from launch.actions import (DeclareLaunchArgument, GroupAction,
+                            IncludeLaunchDescription)
 from launch.conditions import IfCondition
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch.substitutions import LaunchConfiguration
@@ -42,13 +43,17 @@ def generate_launch_description():
         launch_arguments={'use_sim_time': use_sim_time, 'headless': headless}.items(),
     )
 
-    slam = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(nav_share, 'launch', 'slam.launch.py')),
-        # rviz:=false : navigation lance son propre RViz (nav.rviz) -> pas de double fenetre.
-        launch_arguments={'use_sim_time': use_sim_time, 'slam_mode': slam_mode,
-                          'map_name': map_name, 'rviz': 'false'}.items(),
-    )
+    # rviz:=false pour le SLAM (navigation lance son propre RViz nav.rviz).
+    # GroupAction (scoped) : evite que rviz:=false fuie dans le scope parent et
+    # desactive par erreur le RViz de navigation place plus bas.
+    slam = GroupAction([
+        IncludeLaunchDescription(
+            PythonLaunchDescriptionSource(
+                os.path.join(nav_share, 'launch', 'slam.launch.py')),
+            launch_arguments={'use_sim_time': use_sim_time, 'slam_mode': slam_mode,
+                              'map_name': map_name, 'rviz': 'false'}.items(),
+        ),
+    ])
 
     nav2 = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(

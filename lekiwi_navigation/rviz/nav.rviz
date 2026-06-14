@@ -62,6 +62,15 @@ Visualization Manager:
       Topic:
         Value: /plan
       Color: 0; 255; 0
+    - Class: nav2_rviz_plugins/ParticleCloud
+      Name: Amcl Particles
+      Enabled: true
+      Topic:
+        Value: /particle_cloud
+        Reliability Policy: Best Effort
+        Durability Policy: Volatile
+      Color: 0; 180; 0
+      Shape: Arrow (Flat)
   Global Options:
     Background Color: 48; 48; 48
     Fixed Frame: map
