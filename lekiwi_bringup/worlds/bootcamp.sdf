@@ -47,41 +47,80 @@
       </link>
     </model>
 
-    <!-- ====================== Murs d'enceinte (5 x 5 m) ===================== -->
+    <!-- ====================== Murs d'enceinte (8 x 8 m) ===================== -->
     <model name="wall_north">
       <static>true</static>
-      <pose>0 2.5 0.25 0 0 0</pose>
+      <pose>0 4 0.25 0 0 0</pose>
       <link name="link">
-        <collision name="c"><geometry><box><size>5 0.1 0.5</size></box></geometry></collision>
-        <visual name="v"><geometry><box><size>5 0.1 0.5</size></box></geometry>
+        <collision name="c"><geometry><box><size>8 0.1 0.5</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>8 0.1 0.5</size></box></geometry>
           <material><ambient>0.6 0.6 0.7 1</ambient><diffuse>0.6 0.6 0.7 1</diffuse></material></visual>
       </link>
     </model>
     <model name="wall_south">
       <static>true</static>
-      <pose>0 -2.5 0.25 0 0 0</pose>
+      <pose>0 -4 0.25 0 0 0</pose>
       <link name="link">
-        <collision name="c"><geometry><box><size>5 0.1 0.5</size></box></geometry></collision>
-        <visual name="v"><geometry><box><size>5 0.1 0.5</size></box></geometry>
+        <collision name="c"><geometry><box><size>8 0.1 0.5</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>8 0.1 0.5</size></box></geometry>
           <material><ambient>0.6 0.6 0.7 1</ambient><diffuse>0.6 0.6 0.7 1</diffuse></material></visual>
       </link>
     </model>
     <model name="wall_east">
       <static>true</static>
-      <pose>2.5 0 0.25 0 0 0</pose>
+      <pose>4 0 0.25 0 0 0</pose>
       <link name="link">
-        <collision name="c"><geometry><box><size>0.1 5 0.5</size></box></geometry></collision>
-        <visual name="v"><geometry><box><size>0.1 5 0.5</size></box></geometry>
+        <collision name="c"><geometry><box><size>0.1 8 0.5</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.1 8 0.5</size></box></geometry>
           <material><ambient>0.6 0.6 0.7 1</ambient><diffuse>0.6 0.6 0.7 1</diffuse></material></visual>
       </link>
     </model>
     <model name="wall_west">
       <static>true</static>
-      <pose>-2.5 0 0.25 0 0 0</pose>
+      <pose>-4 0 0.25 0 0 0</pose>
       <link name="link">
-        <collision name="c"><geometry><box><size>0.1 5 0.5</size></box></geometry></collision>
-        <visual name="v"><geometry><box><size>0.1 5 0.5</size></box></geometry>
+        <collision name="c"><geometry><box><size>0.1 8 0.5</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.1 8 0.5</size></box></geometry>
           <material><ambient>0.6 0.6 0.7 1</ambient><diffuse>0.6 0.6 0.7 1</diffuse></material></visual>
+      </link>
+    </model>
+
+    <!-- Cloison interieure : cree un recoin pour une meilleure fermeture de boucle SLAM -->
+    <model name="inner_wall">
+      <static>true</static>
+      <pose>-1.0 1.5 0.25 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>2 0.1 0.5</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>2 0.1 0.5</size></box></geometry>
+          <material><ambient>0.6 0.6 0.7 1</ambient><diffuse>0.6 0.6 0.7 1</diffuse></material></visual>
+      </link>
+    </model>
+
+    <!-- ================= Zones de depot (marquages au sol) =================
+         3 points repartis dans la piece. VISUAL uniquement (pas de collision) :
+         le robot roule dessus pour "deposer". A 1 cm de haut, invisibles au LiDAR. -->
+    <model name="zone_a">
+      <static>true</static>
+      <pose>-3 3 0.005 0 0 0</pose>
+      <link name="link">
+        <visual name="v"><geometry><box><size>0.3 0.3 0.01</size></box></geometry>
+          <material><ambient>0.8 0.2 0.2 1</ambient><diffuse>0.8 0.2 0.2 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="zone_b">
+      <static>true</static>
+      <pose>3 3 0.005 0 0 0</pose>
+      <link name="link">
+        <visual name="v"><geometry><box><size>0.3 0.3 0.01</size></box></geometry>
+          <material><ambient>0.2 0.7 0.3 1</ambient><diffuse>0.2 0.7 0.3 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="zone_c">
+      <static>true</static>
+      <pose>0 -3 0.005 0 0 0</pose>
+      <link name="link">
+        <visual name="v"><geometry><box><size>0.3 0.3 0.01</size></box></geometry>
+          <material><ambient>0.2 0.4 0.8 1</ambient><diffuse>0.2 0.4 0.8 1</diffuse></material></visual>
       </link>
     </model>
 
@@ -102,6 +141,62 @@
         <collision name="c"><geometry><cylinder><radius>0.2</radius><length>0.5</length></cylinder></geometry></collision>
         <visual name="v"><geometry><cylinder><radius>0.2</radius><length>0.5</length></cylinder></geometry>
           <material><ambient>0.2 0.4 0.8 1</ambient><diffuse>0.2 0.4 0.8 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="box_obstacle_2">
+      <static>true</static>
+      <pose>2.8 -2.5 0.25 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>0.5 0.5 0.5</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.5 0.5 0.5</size></box></geometry>
+          <material><ambient>0.8 0.6 0.2 1</ambient><diffuse>0.8 0.6 0.2 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="cylinder_obstacle_2">
+      <static>true</static>
+      <pose>-2.6 -2.4 0.25 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><cylinder><radius>0.25</radius><length>0.5</length></cylinder></geometry></collision>
+        <visual name="v"><geometry><cylinder><radius>0.25</radius><length>0.5</length></cylinder></geometry>
+          <material><ambient>0.3 0.7 0.4 1</ambient><diffuse>0.3 0.7 0.4 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="box_obstacle_3">
+      <static>true</static>
+      <pose>3 0.2 0.25 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>0.5 0.5 0.5</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.5 0.5 0.5</size></box></geometry>
+          <material><ambient>0.7 0.3 0.6 1</ambient><diffuse>0.7 0.3 0.6 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="box_obstacle_4">
+      <static>true</static>
+      <pose>-3 0 0.25 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>0.4 0.4 0.5</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.4 0.4 0.5</size></box></geometry>
+          <material><ambient>0.3 0.6 0.7 1</ambient><diffuse>0.3 0.6 0.7 1</diffuse></material></visual>
+      </link>
+    </model>
+    <model name="cylinder_obstacle_3">
+      <static>true</static>
+      <pose>1.4 -1.6 0.25 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><cylinder><radius>0.2</radius><length>0.5</length></cylinder></geometry></collision>
+        <visual name="v"><geometry><cylinder><radius>0.2</radius><length>0.5</length></cylinder></geometry>
+          <material><ambient>0.8 0.7 0.2 1</ambient><diffuse>0.8 0.7 0.2 1</diffuse></material></visual>
+      </link>
+    </model>
+
+    <!-- 2e cloison : cree un couloir entre le centre et la zone B (en haut a droite) -->
+    <model name="inner_wall_2">
+      <static>true</static>
+      <pose>1.5 2 0.25 0 0 0</pose>
+      <link name="link">
+        <collision name="c"><geometry><box><size>0.1 2 0.5</size></box></geometry></collision>
+        <visual name="v"><geometry><box><size>0.1 2 0.5</size></box></geometry>
+          <material><ambient>0.6 0.6 0.7 1</ambient><diffuse>0.6 0.6 0.7 1</diffuse></material></visual>
       </link>
     </model>
 

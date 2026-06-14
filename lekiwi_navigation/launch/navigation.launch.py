@@ -45,8 +45,9 @@ def generate_launch_description():
     slam = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(nav_share, 'launch', 'slam.launch.py')),
+        # rviz:=false : navigation lance son propre RViz (nav.rviz) -> pas de double fenetre.
         launch_arguments={'use_sim_time': use_sim_time, 'slam_mode': slam_mode,
-                          'map_name': map_name}.items(),
+                          'map_name': map_name, 'rviz': 'false'}.items(),
     )
 
     nav2 = IncludeLaunchDescription(
