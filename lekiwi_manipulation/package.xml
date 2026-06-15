@@ -10,8 +10,6 @@
   <maintainer email="contact@etienne-schmitz.com">Etienne Schmitz</maintainer>
   <license>MIT</license>
 
-  <buildtool_depend>ament_python</buildtool_depend>
-
   <exec_depend>rclpy</exec_depend>
   <exec_depend>nav2_msgs</exec_depend>
   <exec_depend>moveit_msgs</exec_depend>

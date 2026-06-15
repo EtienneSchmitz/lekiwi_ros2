@@ -28,7 +28,7 @@
   <!-- Plateforme de manipulation mobile (sim_full.launch.py) : bras SO-101 + pince -->
   <exec_depend>so101_description</exec_depend>
   <exec_depend>joint_trajectory_controller</exec_depend>
-  <exec_depend>parallel_gripper_action_controller</exec_depend>
+  <exec_depend>parallel_gripper_controller</exec_depend>
 
   <export>
     <build_type>ament_cmake</build_type>
