@@ -52,7 +52,8 @@ def launch_setup(context, *args, **kwargs):
         PythonLaunchDescriptionSource(
             os.path.join(get_package_share_directory('lekiwi_bringup'),
                          'launch', 'sim_base.launch.py')),
-        launch_arguments={'use_sim_time': use_sim_time, 'headless': headless}.items(),
+        launch_arguments={'use_sim_time': use_sim_time, 'headless': headless,
+                          'world': LaunchConfiguration('world')}.items(),
         condition=IfCondition(use_sim),
     )
 
@@ -128,6 +129,8 @@ def generate_launch_description():
                               description='Lance RViz (carte + LIDAR). rviz:=false pour couper.'),
         DeclareLaunchArgument('sim', default_value='false',
                               description='true = lance aussi Gazebo (sim_base) pour tout-en-un.'),
+        DeclareLaunchArgument('world', default_value='bootcamp',
+                              description='Monde a charger avec sim:=true (ex: warehouse, bootcamp).'),
         DeclareLaunchArgument('headless', default_value='false',
                               description='true = Gazebo sans GUI (avec sim:=true).'),
         OpaqueFunction(function=launch_setup),

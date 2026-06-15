@@ -40,7 +40,8 @@ def generate_launch_description():
     sim = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             os.path.join(bringup_share, 'launch', 'sim_base.launch.py')),
-        launch_arguments={'use_sim_time': use_sim_time, 'headless': headless}.items(),
+        launch_arguments={'use_sim_time': use_sim_time, 'headless': headless,
+                          'world': LaunchConfiguration('world')}.items(),
     )
 
     # rviz:=false pour le SLAM (navigation lance son propre RViz nav.rviz).
@@ -72,6 +73,8 @@ def generate_launch_description():
         DeclareLaunchArgument('use_sim_time', default_value='true'),
         DeclareLaunchArgument('headless', default_value='false',
                               description='true = Gazebo sans GUI.'),
+        DeclareLaunchArgument('world', default_value='bootcamp',
+                              description='Monde a charger (ex: warehouse, bootcamp).'),
         DeclareLaunchArgument('slam_mode', default_value='map',
                               description='map | localize | amcl'),
         DeclareLaunchArgument('map_name', default_value='',

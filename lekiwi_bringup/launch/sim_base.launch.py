@@ -13,7 +13,8 @@ import os
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
 from launch.actions import (AppendEnvironmentVariable, DeclareLaunchArgument,
-                            IncludeLaunchDescription, RegisterEventHandler)
+                            IncludeLaunchDescription, OpaqueFunction,
+                            RegisterEventHandler)
 from launch.conditions import IfCondition, UnlessCondition
 from launch.event_handlers import OnProcessExit
 from launch.launch_description_sources import PythonLaunchDescriptionSource
@@ -31,11 +32,12 @@ def generate_launch_description():
     twist_mux_file = os.path.join(bringup_share, 'config', 'twist_mux.yaml')
     bridge_file = os.path.join(bringup_share, 'config', 'bridge.yaml')
     ekf_file = os.path.join(bringup_share, 'config', 'ekf.yaml')
-    default_world = os.path.join(bringup_share, 'worlds', 'bootcamp.sdf')
     model_xacro = os.path.join(desc_share, 'urdf', 'lekiwi.urdf.xacro')
 
     world_arg = DeclareLaunchArgument(
-        'world', default_value=default_world, description='Monde SDF a charger.')
+        'world', default_value='bootcamp',
+        description="Monde a charger : nom court (ex: warehouse, bootcamp) "
+                    "resolu dans worlds/, ou chemin .sdf complet.")
     use_sim_time = LaunchConfiguration('use_sim_time')
     use_sim_time_arg = DeclareLaunchArgument(
         'use_sim_time', default_value='true', description='Utiliser l horloge sim.')
@@ -67,18 +69,29 @@ def generate_launch_description():
     )
 
     # --- Gazebo (GUI ou serveur seul selon 'headless') ---
-    gz_sim_gui = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(ros_gz_sim_share, 'launch', 'gz_sim.launch.py')),
-        launch_arguments={'gz_args': [LaunchConfiguration('world'), ' -r -v4']}.items(),
-        condition=UnlessCondition(headless),
-    )
-    gz_sim_headless = IncludeLaunchDescription(
-        PythonLaunchDescriptionSource(
-            os.path.join(ros_gz_sim_share, 'launch', 'gz_sim.launch.py')),
-        launch_arguments={'gz_args': [LaunchConfiguration('world'), ' -r -s -v4']}.items(),
-        condition=IfCondition(headless),
-    )
+    # Resolution differee du monde (nom court -> chemin) via OpaqueFunction :
+    # 'warehouse' -> worlds/warehouse.sdf ; un chemin absolu est utilise tel quel.
+    def gz_sim_setup(context):
+        world = LaunchConfiguration('world').perform(context)
+        if world and not os.path.isabs(world):
+            name = world if world.endswith('.sdf') else f'{world}.sdf'
+            world = os.path.join(bringup_share, 'worlds', name)
+        gz_launch = PythonLaunchDescriptionSource(
+            os.path.join(ros_gz_sim_share, 'launch', 'gz_sim.launch.py'))
+        return [
+            IncludeLaunchDescription(
+                gz_launch,
+                launch_arguments={'gz_args': f'{world} -r -v4'}.items(),
+                condition=UnlessCondition(headless),
+            ),
+            IncludeLaunchDescription(
+                gz_launch,
+                launch_arguments={'gz_args': f'{world} -r -s -v4'}.items(),
+                condition=IfCondition(headless),
+            ),
+        ]
+
+    gz_sim = OpaqueFunction(function=gz_sim_setup)
 
     spawn_robot = Node(
         package='ros_gz_sim', executable='create',
@@ -134,8 +147,7 @@ def generate_launch_description():
         headless_arg,
         set_resource_path,
         robot_state_publisher,
-        gz_sim_gui,
-        gz_sim_headless,
+        gz_sim,
         spawn_robot,
         bridge,
         after_spawn_jsb,
