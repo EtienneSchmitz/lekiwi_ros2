@@ -40,8 +40,6 @@ ARGS = [
 
 
 def _spawn_node(context, *_, **__):
-    pose_str = LaunchConfiguration('pose').perform(context).strip()
-    pose = [float(v) for v in pose_str.split()] if pose_str else []
     params = {
         'world': LaunchConfiguration('world').perform(context),
         'object_type': LaunchConfiguration('object_type').perform(context),
@@ -49,7 +47,7 @@ def _spawn_node(context, *_, **__):
         'class_id': LaunchConfiguration('class_id').perform(context),
         'aruco_id': int(LaunchConfiguration('aruco_id').perform(context)),
         'model_path': LaunchConfiguration('model_path').perform(context),
-        'pose': pose,
+        'pose': LaunchConfiguration('pose').perform(context),  # "x y z [yaw]" (vide => aleatoire)
         'count': int(LaunchConfiguration('count').perform(context)),
         'name': LaunchConfiguration('name').perform(context),
         'action': LaunchConfiguration('action').perform(context),

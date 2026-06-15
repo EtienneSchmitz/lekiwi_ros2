@@ -101,7 +101,7 @@ class ObjectSpawner(Node):
         self.declare_parameter('class_id', '')                   # defaut : derive du type/couleur
         self.declare_parameter('aruco_id', 0)
         self.declare_parameter('model_path', '')                 # si object_type=sdf
-        self.declare_parameter('pose', [])                       # [x,y,z(,yaw)] ; vide => aleatoire
+        self.declare_parameter('pose', '')                       # "x y z [yaw]" ; vide => aleatoire
         self.declare_parameter('station_xy', [0.0, 4.6])         # centre zone station (= <pose> du monde)
         self.declare_parameter('station_z', 0.17)                # hauteur d'apparition (monde)
         self.declare_parameter('jitter', 0.06)                   # demi-cote de la zone aleatoire (m)
@@ -163,10 +163,11 @@ class ObjectSpawner(Node):
 
     # ----------------------------------------------------------------- pose
     def make_pose(self, index):
-        raw = list(self.get_parameter('pose').value)
-        if raw:  # pose explicite
-            x, y, z = float(raw[0]), float(raw[1]), float(raw[2])
-            yaw = float(raw[3]) if len(raw) > 3 else 0.0
+        pose_str = str(self.get_parameter('pose').value).strip()
+        raw = [float(v) for v in pose_str.split()] if pose_str else []
+        if len(raw) >= 3:  # pose explicite "x y z [yaw]"
+            x, y, z = raw[0], raw[1], raw[2]
+            yaw = raw[3] if len(raw) > 3 else 0.0
             if index:  # decaler les copies suivantes
                 x += 0.06 * index
         else:     # pose aleatoire dans la zone station
