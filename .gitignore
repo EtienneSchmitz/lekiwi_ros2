@@ -5,3 +5,7 @@ __pycache__/
 *.pyc
 .vscode/
 .idea/
+
+# Cartes SLAM / Nav2 generees (regenerees par chaque etudiant) — non versionnees
+/lekiwi_navigation/maps/*
+!/lekiwi_navigation/maps/README.md

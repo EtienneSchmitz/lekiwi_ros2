@@ -62,7 +62,7 @@ Visualization Manager:
       Topic:
         Value: /plan
       Color: 0; 255; 0
-    - Class: nav2_rviz_plugins/ParticleCloud
+    - Class: rviz_default_plugins/PoseArray
       Name: Amcl Particles
       Enabled: true
       Topic:
