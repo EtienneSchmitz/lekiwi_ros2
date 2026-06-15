@@ -1,0 +1,25 @@
+# Alias de la camera eye-in-hand sous le nom d'interface attendu par le detector
+# (Jour 4). Re-ponte le MEME topic gz que la camera du poignet, mais sous les noms
+# ROS /camera/image_raw et /camera/camera_info. Utilise uniquement ros_gz_bridge
+# (deja une dependance) : pas besoin de topic_tools ni ros_gz_image.
+#
+# Les topics /wrist_camera/* restent disponibles via bridge_full.yaml ; ce fichier
+# ajoute juste les alias /camera/*. Active par warehouse_sim.launch.py (camera_alias).
+
+- ros_topic_name: "/camera/image_raw"
+  gz_topic_name: "/wrist_camera/image"
+  ros_type_name: "sensor_msgs/msg/Image"
+  gz_type_name: "gz.msgs.Image"
+  direction: GZ_TO_ROS
+
+- ros_topic_name: "/camera/camera_info"
+  gz_topic_name: "/wrist_camera/camera_info"
+  ros_type_name: "sensor_msgs/msg/CameraInfo"
+  gz_type_name: "gz.msgs.CameraInfo"
+  direction: GZ_TO_ROS
+
+- ros_topic_name: "/camera/depth_image"
+  gz_topic_name: "/wrist_camera/depth_image"
+  ros_type_name: "sensor_msgs/msg/Image"
+  gz_type_name: "gz.msgs.Image"
+  direction: GZ_TO_ROS

@@ -1,0 +1,45 @@
+<?xml version="1.0"?>
+<!-- Dechet "bouteille plastique" : corps cylindre Ø0.025 x 0.05 + col Ø0.012 x 0.025,
+     bleu translucide, ~0.02 kg. Classe plastic. Inertie ~ cylindre equivalent. -->
+<sdf version="1.9">
+  <model name="waste_bottle">
+    <link name="link">
+      <inertial>
+        <mass>0.02</mass>
+        <inertia>
+          <ixx>8.95e-6</ixx><iyy>8.95e-6</iyy><izz>1.56e-6</izz>
+          <ixy>0</ixy><ixz>0</ixz><iyz>0</iyz>
+        </inertia>
+      </inertial>
+      <!-- Corps -->
+      <collision name="body_col">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry><cylinder><radius>0.0125</radius><length>0.05</length></cylinder></geometry>
+      </collision>
+      <visual name="body_vis">
+        <pose>0 0 0 0 0 0</pose>
+        <geometry><cylinder><radius>0.0125</radius><length>0.05</length></cylinder></geometry>
+        <material>
+          <ambient>0.10 0.30 0.55 0.6</ambient>
+          <diffuse>0.15 0.45 0.75 0.6</diffuse>
+          <specular>0.3 0.3 0.3 1</specular>
+          <transparency>0.35</transparency>
+        </material>
+      </visual>
+      <!-- Col (au-dessus du corps) -->
+      <collision name="neck_col">
+        <pose>0 0 0.0375 0 0 0</pose>
+        <geometry><cylinder><radius>0.006</radius><length>0.025</length></cylinder></geometry>
+      </collision>
+      <visual name="neck_vis">
+        <pose>0 0 0.0375 0 0 0</pose>
+        <geometry><cylinder><radius>0.006</radius><length>0.025</length></cylinder></geometry>
+        <material>
+          <ambient>0.10 0.30 0.55 0.6</ambient>
+          <diffuse>0.15 0.45 0.75 0.6</diffuse>
+          <transparency>0.35</transparency>
+        </material>
+      </visual>
+    </link>
+  </model>
+</sdf>

@@ -1,0 +1,16 @@
+# Pont de SERVICES ros_gz_bridge pour le spawn / suppression d'objets dans le monde
+# Gazebo Ionic "warehouse". Expose cote ROS 2 :
+#   /world/warehouse/create  (ros_gz_interfaces/srv/SpawnEntity)  -> gz EntityFactory
+#   /world/warehouse/remove  (ros_gz_interfaces/srv/DeleteEntity) -> gz Entity
+# Utilise par scripts/spawn_object.py. Si le monde n'est PAS "warehouse", adapter le
+# nom du monde dans les deux service_name (ou passer world:= au launch).
+
+- service_name: "/world/warehouse/create"
+  ros_type_name: "ros_gz_interfaces/srv/SpawnEntity"
+  gz_req_type_name: "gz.msgs.EntityFactory"
+  gz_rep_type_name: "gz.msgs.Boolean"
+
+- service_name: "/world/warehouse/remove"
+  ros_type_name: "ros_gz_interfaces/srv/DeleteEntity"
+  gz_req_type_name: "gz.msgs.Entity"
+  gz_rep_type_name: "gz.msgs.Boolean"

@@ -1,7 +1,23 @@
 <?xml version="1.0"?>
-<!-- Monde Warehouse : entrepot 15 x 12 m pour le LeKiwi (teleop, SLAM, Nav2) dans
-     Gazebo Ionic (gz-sim 9). Contient 3 zones de depot (marquages au sol colores,
-     sans collision) + des obstacles physiques (rayonnages, piliers, caisses, cloison). -->
+<!-- Monde Warehouse "pick & place" : entrepot 15 x 12 m pour le manipulateur mobile
+     LeKiwi + SO-101 (teleop, SLAM, Nav2, pick & place) dans Gazebo Ionic (gz-sim 9).
+
+     Contenu :
+       - sol + murs d'enceinte + cloison interieure (obstacles LiDAR pour Nav2) ;
+       - rayonnages / piliers / caisses (decor de navigation) ;
+       - 3 zones de depot colorees (marquages au sol, sans collision) :
+             zone_a (rouge)  zone_b (vert)  zone_c (bleu)
+         reparties dans l'entrepot => forcent la navigation entre station et depot.
+         Scenario de tri propose (libre cote coordinateur etudiant) :
+             metal -> zone_a   plastic -> zone_b   paper -> zone_c
+       - pick_station : table BASSE ou apparaissent les objets a saisir. Le robot se
+         gare au POSTE (0.0, 4.0, yaw=pi/2 ~ face +Y) ; l'objet tombe alors dans
+         l'enveloppe atteignable du SO-101 (arm_base_link ~0.119 m du sol ; envelope
+         X 0.15-0.25, Y +/-0.20, Z 0.05-0.15 => objet a Z ~0.17 m monde).
+
+     Tout est deplacable en editant UNE seule <pose> (station, zones, poste). Les objets
+     ne sont PAS pre-places : ils sont spawnes par lekiwi_bringup/scripts/spawn_object.py
+     (zone d'apparition = parametres station_xy / station_z du script). -->
 <sdf version="1.9">
   <world name="warehouse">
 
@@ -22,6 +38,9 @@
     </plugin>
     <plugin filename="gz-sim-imu-system"
             name="gz::sim::systems::Imu"/>
+    <!-- Contact : permet de detecter les contacts (saisie / depose) plus tard. -->
+    <plugin filename="gz-sim-contact-system"
+            name="gz::sim::systems::Contact"/>
 
     <light type="directional" name="sun">
       <cast_shadows>true</cast_shadows>
@@ -132,6 +151,49 @@
       <link name="link">
         <visual name="v"><geometry><box><size>0.5 0.5 0.01</size></box></geometry>
           <material><ambient>0.2 0.4 0.8 1</ambient><diffuse>0.2 0.4 0.8 1</diffuse></material></visual>
+      </link>
+    </model>
+
+    <!-- ================= Station de prelevement (table BASSE) ==============
+         Plateau a z=0.15 (top), 0.5x0.5, brun, + 4 pieds. Statique. Les objets a
+         saisir y apparaissent (spawn_object.py). Le robot se gare au POSTE
+         (0.0, 4.0, yaw=pi/2) : la station est alors devant lui, a portee du SO-101.
+         Pour deplacer la station : editer cette <pose> ET station_xy du spawner. -->
+    <model name="pick_station">
+      <static>true</static>
+      <pose>0 4.6 0 0 0 0</pose>
+      <link name="link">
+        <!-- plateau : epaisseur 0.03, centre z = 0.15 - 0.015 = 0.135 -->
+        <collision name="top_col">
+          <pose>0 0 0.135 0 0 0</pose>
+          <geometry><box><size>0.5 0.5 0.03</size></box></geometry>
+        </collision>
+        <visual name="top_vis">
+          <pose>0 0 0.135 0 0 0</pose>
+          <geometry><box><size>0.5 0.5 0.03</size></box></geometry>
+          <material><ambient>0.45 0.30 0.15 1</ambient><diffuse>0.55 0.35 0.18 1</diffuse></material>
+        </visual>
+        <!-- 4 pieds 0.04x0.04x0.12, centre z=0.06, aux coins (+/-0.22, +/-0.22) -->
+        <collision name="leg1_col"><pose>0.22 0.22 0.06 0 0 0</pose>
+          <geometry><box><size>0.04 0.04 0.12</size></box></geometry></collision>
+        <visual name="leg1_vis"><pose>0.22 0.22 0.06 0 0 0</pose>
+          <geometry><box><size>0.04 0.04 0.12</size></box></geometry>
+          <material><ambient>0.40 0.26 0.13 1</ambient><diffuse>0.50 0.32 0.16 1</diffuse></material></visual>
+        <collision name="leg2_col"><pose>-0.22 0.22 0.06 0 0 0</pose>
+          <geometry><box><size>0.04 0.04 0.12</size></box></geometry></collision>
+        <visual name="leg2_vis"><pose>-0.22 0.22 0.06 0 0 0</pose>
+          <geometry><box><size>0.04 0.04 0.12</size></box></geometry>
+          <material><ambient>0.40 0.26 0.13 1</ambient><diffuse>0.50 0.32 0.16 1</diffuse></material></visual>
+        <collision name="leg3_col"><pose>0.22 -0.22 0.06 0 0 0</pose>
+          <geometry><box><size>0.04 0.04 0.12</size></box></geometry></collision>
+        <visual name="leg3_vis"><pose>0.22 -0.22 0.06 0 0 0</pose>
+          <geometry><box><size>0.04 0.04 0.12</size></box></geometry>
+          <material><ambient>0.40 0.26 0.13 1</ambient><diffuse>0.50 0.32 0.16 1</diffuse></material></visual>
+        <collision name="leg4_col"><pose>-0.22 -0.22 0.06 0 0 0</pose>
+          <geometry><box><size>0.04 0.04 0.12</size></box></geometry></collision>
+        <visual name="leg4_vis"><pose>-0.22 -0.22 0.06 0 0 0</pose>
+          <geometry><box><size>0.04 0.04 0.12</size></box></geometry>
+          <material><ambient>0.40 0.26 0.13 1</ambient><diffuse>0.50 0.32 0.16 1</diffuse></material></visual>
       </link>
     </model>
 
