@@ -34,11 +34,16 @@ def generate_launch_description():
     rviz = LaunchConfiguration('rviz')
     rviz_arg = DeclareLaunchArgument(
         'rviz', default_value='true', description='Lancer RViz MoveIt.')
+    world_arg = DeclareLaunchArgument(
+        'world', default_value='bootcamp.sdf',
+        description='Fichier monde dans lekiwi_bringup/worlds/ (ex: warehouse.sdf).')
+    world_path = PathJoinSubstitution(
+        [bringup_share, 'worlds', LaunchConfiguration('world')])
 
     sim_full = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             PathJoinSubstitution([bringup_share, 'launch', 'sim_full.launch.py'])),
-        launch_arguments={'headless': headless}.items(),
+        launch_arguments={'headless': headless, 'world': world_path}.items(),
     )
     move_group = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -55,6 +60,7 @@ def generate_launch_description():
         SetParameter(name='use_sim_time', value=True),
         headless_arg,
         rviz_arg,
+        world_arg,
         sim_full,
         move_group,
         moveit_rviz,

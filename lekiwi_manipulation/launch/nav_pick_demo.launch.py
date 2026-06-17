@@ -35,11 +35,13 @@ def generate_launch_description():
 
     headless = LaunchConfiguration('headless')
     use_rviz = LaunchConfiguration('rviz')
+    world_path = PathJoinSubstitution(
+        [bringup_share, 'worlds', LaunchConfiguration('world')])
 
     sim_full = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
             PathJoinSubstitution([bringup_share, 'launch', 'sim_full.launch.py'])),
-        launch_arguments={'headless': headless}.items(),
+        launch_arguments={'headless': headless, 'world': world_path}.items(),
     )
     slam = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(
@@ -76,6 +78,9 @@ def generate_launch_description():
                               description='true = Gazebo sans GUI.'),
         DeclareLaunchArgument('rviz', default_value='false',
                               description='Lancer RViz MoveIt.'),
+        DeclareLaunchArgument('world', default_value='bootcamp.sdf',
+                              description='Fichier monde dans lekiwi_bringup/worlds/ '
+                                          '(ex: warehouse.sdf).'),
         sim_full,
         slam,
         nav2,
