@@ -68,6 +68,8 @@ def generate_launch_description():
         'GZ_SIM_RESOURCE_PATH', os.path.dirname(desc_share))
     set_resource_path_so101 = AppendEnvironmentVariable(
         'GZ_SIM_RESOURCE_PATH', os.path.dirname(so101_share))
+    set_resource_path_models = AppendEnvironmentVariable(
+        'GZ_SIM_RESOURCE_PATH', os.path.join(bringup_share, 'models'))
 
     # --- robot_description (plateforme, mode gazebo) ---
     robot_description = ParameterValue(
@@ -176,6 +178,7 @@ def generate_launch_description():
         scene_camera_arg,
         set_resource_path_lekiwi,
         set_resource_path_so101,
+        set_resource_path_models,
         robot_state_publisher,
         gz_sim_gui,
         gz_sim_headless,

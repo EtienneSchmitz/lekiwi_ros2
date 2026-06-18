@@ -67,10 +67,21 @@ def cube_color_sdf(rgba):
 def cube_aruco_sdf(marker_id):
     """SDF inline d'un cube 4 cm avec marqueur ArUco <id> sur le dessus.
 
-    L'URI de texture est relative : resolue via GZ_SIM_RESOURCE_PATH (qui doit
-    contenir .../lekiwi_bringup/models, ajoute par le launch).
+    La texture est referencee par son CHEMIN ABSOLU : un SDF inline (spawne via
+    le service create) n'a pas de dossier de reference, donc une URI relative
+    n'est resolue que si le SERVEUR gz a .../models sur GZ_SIM_RESOURCE_PATH —
+    ce qui n'est pas garanti. Le chemin absolu rend le SDF auto-suffisant.
     """
-    tex = f"aruco_cube/materials/textures/aruco_{marker_id}.png"
+    from ament_index_python.packages import get_package_share_directory
+    share = get_package_share_directory('lekiwi_bringup')
+    tex = os.path.join(share, 'models', 'aruco_cube', 'materials',
+                       'textures', f'aruco_{marker_id}.png')
+    if not os.path.isfile(tex):
+        # On garde le spawn (cube blanc) mais on previent : marqueur introuvable.
+        import sys
+        print(f"[spawn_object] ATTENTION: texture ArUco absente: {tex} "
+              f"(generer avec: ros2 run lekiwi_bringup generate_aruco.py --id {marker_id})",
+              file=sys.stderr)
     return f"""<?xml version="1.0"?>
 <sdf version="1.9">
   <model name="aruco_cube">
