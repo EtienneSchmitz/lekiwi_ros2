@@ -86,7 +86,7 @@
     <xacro:if value="${wrist_enabled}">
       <xacro:rgbd_camera name="wrist" parent="${wrist_parent}" topic="wrist_camera"
                          fov="1.2" near="0.02" far="2.0">
-        <origin xyz="0 0.02 0.09" rpy="0 0.45 -1.52"/>
+        <origin xyz="0 0.02 0.10" rpy="0 0.38 -1.51"/>
       </xacro:rgbd_camera>
     </xacro:if>
 
