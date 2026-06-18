@@ -78,12 +78,15 @@
                params="wrist_enabled:=true scene_enabled:=true
                        wrist_parent:=arm_wrist_link mount_parent:=mount_link">
 
-    <!-- WRIST (eye-in-hand) : montee sur le cote du poignet, orientee vers le
-         gripper. La pose fine est a ajuster visuellement (RViz/Gazebo GUI). -->
+    <!-- WRIST (eye-in-hand) : deportee AU-DESSUS du poignet, regard vers le gripper.
+         Dans le repere arm_wrist_link, la pince s'etend vers -Y (gripper a Y=-0.061,
+         TCP a Y=-0.159). On place la camera en hauteur (+Z) et legerement reculee
+         (+Y) pour degager le corps du bras, et on oriente l'axe optique (+X du
+         capteur) vers le TCP (-Y avec une plongee). -->
     <xacro:if value="${wrist_enabled}">
       <xacro:rgbd_camera name="wrist" parent="${wrist_parent}" topic="wrist_camera"
                          fov="1.2" near="0.02" far="2.0">
-        <origin xyz="0 -0.045 0.03" rpy="0 ${pi/2} ${-pi/2}"/>
+        <origin xyz="0 0.02 0.09" rpy="0 0.45 -1.52"/>
       </xacro:rgbd_camera>
     </xacro:if>
 
